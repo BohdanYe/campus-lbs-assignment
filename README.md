@@ -68,3 +68,63 @@ Part 1 completed:
 - Spatial models
 - Database migrations
 - Spatial indexes
+
+## REST API
+
+The application provides RESTful CRUD endpoints for all spatial entities.
+
+### Places
+
+- `GET /api/places/`
+- `POST /api/places/`
+- `GET /api/places/{id}/`
+- `PUT /api/places/{id}/`
+- `PATCH /api/places/{id}/`
+- `DELETE /api/places/{id}/`
+
+### Routes
+
+- `GET /api/routes/`
+- `POST /api/routes/`
+- `GET /api/routes/{id}/`
+- `PUT /api/routes/{id}/`
+- `PATCH /api/routes/{id}/`
+- `DELETE /api/routes/{id}/`
+
+### Zones
+
+- `GET /api/zones/`
+- `POST /api/zones/`
+- `GET /api/zones/{id}/`
+- `PUT /api/zones/{id}/`
+- `PATCH /api/zones/{id}/`
+- `DELETE /api/zones/{id}/`
+
+## Spatial Queries
+
+### 1. Nearest Place Search
+
+Finds the closest campus facilities to a supplied point.
+
+Example:
+
+```text
+/api/places/nearest/?lat=53.3552&lng=-6.2795&limit=5
+
+### 2. Radius Search
+Finds campus facilities within a specified radius.
+
+Example:
+/api/places/within-radius/?lat=53.3552&lng=-6.2795&radius=500
+
+### 3. Point-in-Polygon Search
+Determines which campus zones contain a selected location.
+
+Example:
+/api/zones/contains-point/?lat=53.3550&lng=-6.2800
+
+### 4. Spatial Intersection
+Finds routes that intersect a selected campus zone.
+
+Example:
+/api/routes/intersecting-zone/?zone_id=1
