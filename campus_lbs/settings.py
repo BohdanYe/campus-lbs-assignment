@@ -35,28 +35,27 @@ ALLOWED_HOSTS = os.environ.get(
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
+    # Django applications
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "django.contrib.gis",
 
-    # GeoDjango
-    'django.contrib.gis',
+    # Third-party applications
+    "rest_framework",
+    "rest_framework_gis",
+    "django_filters",
+    "corsheaders",
 
-    # REST API
-    'rest_framework',
-    'rest_framework_gis',
-    'django_filters',
-    'corsheaders',
-
-    # Assignment applications
-    'places',
-    'routes',
-    'zones',
-    'api',
-    'dashboard',
+    # Project applications
+    "places",
+    "routes",
+    "zones",
+    "api",
+    "dashboard",
 ]
 
 MIDDLEWARE = [
@@ -75,14 +74,19 @@ ROOT_URLCONF = 'campus_lbs.urls'
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+
+        "DIRS": [
+            BASE_DIR / "templates",
+        ],
+
+        "APP_DIRS": True,
+
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
@@ -150,6 +154,10 @@ STATICFILES_DIRS = [
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
+
+# Send the referring website when requesting external resources,
+# such as OpenStreetMap map tiles.
+SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
