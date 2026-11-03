@@ -23,6 +23,7 @@ class PlaceSerializer(GeoFeatureModelSerializer):
         fields = [
             "id",
             "name",
+            "building_code",
             "description",
             "category",
             "opening_hours",

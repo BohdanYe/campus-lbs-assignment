@@ -46,135 +46,193 @@ class Command(BaseCommand):
 
         places = [
             {
-                "name": "Central Library",
+                "name": "Academic Hub & Library",
+                "building_code": "AH",
                 "description": (
-                    "Main study and library facility."
+                    "TU Dublin's main Grangegorman library and academic support hub. "
+                    "Includes study spaces, learning supports, event space and a cafe."
                 ),
                 "category": "library",
-                "lng": -6.2795,
-                "lat": 53.3552,
-                "opening_hours": "08:00-21:00",
+                "lng": -6.2809,
+                "lat": 53.3562,
+                "opening_hours": "Term time: Library generally 09:00-21:00 Mon-Thu",
                 "is_accessible": True,
             },
             {
-                "name": "Student Hub",
+                "name": "Central Quad",
+                "building_code": "CQ",
                 "description": (
-                    "Student support and social area."
+                    "Major teaching building containing science, computing, engineering, "
+                    "culinary arts and other academic facilities."
                 ),
-                "category": "study",
-                "lng": -6.2787,
-                "lat": 53.3555,
-                "opening_hours": "08:00-20:00",
-                "is_accessible": True,
-            },
-            {
-                "name": "Campus Cafe",
-                "description": (
-                    "Cafe serving drinks and food."
-                ),
-                "category": "cafe",
-                "lng": -6.2800,
-                "lat": 53.3548,
-                "opening_hours": "08:00-17:00",
-                "is_accessible": True,
-            },
-            {
-                "name": "North Study Area",
-                "description": (
-                    "Quiet study location."
-                ),
-                "category": "study",
-                "lng": -6.2791,
-                "lat": 53.3561,
-                "opening_hours": "09:00-20:00",
-                "is_accessible": True,
-            },
-            {
-                "name": "Print Station A",
-                "description": (
-                    "Student printing facility."
-                ),
-                "category": "printer",
-                "lng": -6.2783,
-                "lat": 53.3549,
-                "opening_hours": "08:00-21:00",
-                "is_accessible": True,
-            },
-            {
-                "name": "Bike Parking North",
-                "description": (
-                    "Covered bicycle parking."
-                ),
-                "category": "bike",
-                "lng": -6.2805,
+                "category": "academic",
+                "lng": -6.2789,
                 "lat": 53.3560,
-                "opening_hours": "24 hours",
+                "opening_hours": "Term time: 08:00-22:00 Mon-Thu",
                 "is_accessible": True,
             },
             {
-                "name": "Accessibility Support",
+                "name": "East Quad",
+                "building_code": "EQ",
                 "description": (
-                    "Accessibility support services."
+                    "Academic building for media, social sciences, creative arts, "
+                    "music and drama."
                 ),
-                "category": "accessibility",
-                "lng": -6.2779,
+                "category": "academic",
+                "lng": -6.2764,
+                "lat": 53.3538,
+                "opening_hours": "Term time: 08:00-22:00 Mon-Thu",
+                "is_accessible": True,
+            },
+            {
+                "name": "Lower House",
+                "building_code": "LH",
+                "description": (
+                    "Campus building containing student facilities, common rooms, "
+                    "fitness spaces and student union services."
+                ),
+                "category": "student_services",
+                "lng": -6.2782,
+                "lat": 53.3527,
+                "opening_hours": "Term time: 08:00-22:00 Mon-Thu",
+                "is_accessible": True,
+            },
+            {
+                "name": "Rathdown House",
+                "building_code": "RD",
+                "description": (
+                    "Student services building containing the Student Hub, "
+                    "Student Health Centre and counselling services."
+                ),
+                "category": "student_services",
+                "lng": -6.2800,
+                "lat": 53.3551,
+                "opening_hours": "Term time: 08:00-22:00 Mon-Thu",
+                "is_accessible": True,
+            },
+            {
+                "name": "Student Health Centre",
+                "description": (
+                    "TU Dublin student health and counselling services located "
+                    "in Rathdown House."
+                ),
+                "category": "health",
+                "lng": -6.2800,
+                "lat": 53.3550,
+                "opening_hours": "Check current TU Dublin service hours",
+                "is_accessible": True,
+            },
+            {
+                "name": "Glassmanogue Gym",
+                "description": (
+                    "University gym with fitness equipment, changing facilities "
+                    "and access to sports programmes."
+                ),
+                "category": "sports",
+                "lng": -6.2818,
+                "lat": 53.3552,
+                "opening_hours": "Term time building hours vary",
+                "is_accessible": True,
+            },
+            {
+                "name": "Greenway Hub",
+                "description": (
+                    "Campus building located close to the central academic area."
+                ),
+                "category": "academic",
+                "lng": -6.2793,
+                "lat": 53.3554,
+                "opening_hours": "Term time: 08:00-22:00 Mon-Thu",
+                "is_accessible": True,
+            },
+            {
+                "name": "National Optometry Centre",
+                "description": (
+                    "Purpose-built optometry teaching and public clinical facility."
+                ),
+                "category": "health",
+                "lng": -6.2798,
                 "lat": 53.3556,
-                "opening_hours": "09:00-17:00",
+                "opening_hours": "Check current clinic opening hours",
                 "is_accessible": True,
             },
             {
-                "name": "South Study Room",
+                "name": "St. Laurence",
                 "description": (
-                    "Group and individual study space."
+                    "Centre for prayer, worship, culture, spiritual development "
+                    "and events."
                 ),
-                "category": "study",
-                "lng": -6.2790,
-                "lat": 53.3542,
-                "opening_hours": "09:00-20:00",
+                "category": "community",
+                "lng": -6.2810,
+                "lat": 53.3548,
+                "opening_hours": "Check current campus schedule",
                 "is_accessible": True,
             },
             {
-                "name": "South Cafe",
+                "name": "The Golden Bandstand",
                 "description": (
-                    "Small student cafe."
+                    "Outdoor campus landmark and event space."
+                ),
+                "category": "heritage",
+                "lng": -6.2797,
+                "lat": 53.3555,
+                "opening_hours": "Campus grounds hours",
+                "is_accessible": True,
+            },
+            {
+                "name": "Park House",
+                "description": (
+                    "Campus building located on the northern side of Grangegorman."
+                ),
+                "category": "academic",
+                "lng": -6.2830,
+                "lat": 53.3575,
+                "opening_hours": "Typically 08:00-18:00",
+                "is_accessible": True,
+            },
+            {
+                "name": "Bradogue",
+                "description": (
+                    "Campus building containing student support and union-related facilities."
+                ),
+                "category": "student_services",
+                "lng": -6.2790,
+                "lat": 53.3545,
+                "opening_hours": "Term time: 08:00-22:00 Mon-Thu",
+                "is_accessible": True,
+            },
+            {
+                "name": "Printmaking Workshop",
+                "description": (
+                    "Specialist printmaking workshop on the Grangegorman campus."
+                ),
+                "category": "academic",
+                "lng": -6.2769,
+                "lat": 53.3546,
+                "opening_hours": "Academic access hours",
+                "is_accessible": True,
+            },
+            {
+                "name": "Clocktower",
+                "description": (
+                    "Historic landmark building within the Grangegorman campus."
+                ),
+                "category": "heritage",
+                "lng": -6.2803,
+                "lat": 53.3544,
+                "opening_hours": "Campus access hours",
+                "is_accessible": True,
+            },
+            {
+                "name": "Training Restaurants",
+                "description": (
+                    "Training restaurant facilities associated with Central Quad "
+                    "and hospitality education."
                 ),
                 "category": "cafe",
-                "lng": -6.2778,
-                "lat": 53.3544,
-                "opening_hours": "08:30-16:30",
-                "is_accessible": False,
-            },
-            {
-                "name": "Print Station B",
-                "description": (
-                    "Secondary student printing area."
-                ),
-                "category": "printer",
-                "lng": -6.2802,
-                "lat": 53.3540,
-                "opening_hours": "09:00-18:00",
-                "is_accessible": True,
-            },
-            {
-                "name": "Bike Parking South",
-                "description": (
-                    "Outdoor bicycle parking."
-                ),
-                "category": "bike",
-                "lng": -6.2810,
-                "lat": 53.3538,
-                "opening_hours": "24 hours",
-                "is_accessible": True,
-            },
-            {
-                "name": "Student Services",
-                "description": (
-                    "General student services office."
-                ),
-                "category": "other",
-                "lng": -6.2774,
-                "lat": 53.3550,
-                "opening_hours": "09:00-17:00",
+                "lng": -6.2787,
+                "lat": 53.3558,
+                "opening_hours": "Reservations / academic schedule",
                 "is_accessible": True,
             },
         ]
@@ -183,6 +241,7 @@ class Command(BaseCommand):
             Place.objects.update_or_create(
                 name=item["name"],
                 defaults={
+                    "building_code": item.get("building_code", ""),
                     "description": item["description"],
                     "category": item["category"],
                     "location": Point(
@@ -190,12 +249,8 @@ class Command(BaseCommand):
                         item["lat"],
                         srid=4326,
                     ),
-                    "opening_hours": (
-                        item["opening_hours"]
-                    ),
-                    "is_accessible": (
-                        item["is_accessible"]
-                    ),
+                    "opening_hours": item["opening_hours"],
+                    "is_accessible": item["is_accessible"],
                 },
             )
 
@@ -211,44 +266,50 @@ class Command(BaseCommand):
 
         campus_boundary = Polygon(
             (
-                (-6.2815, 53.3534),
-                (-6.2768, 53.3534),
-                (-6.2768, 53.3565),
-                (-6.2815, 53.3565),
-                (-6.2815, 53.3534),
+                (-6.2842, 53.3583),
+                (-6.2816, 53.3587),
+                (-6.2793, 53.3584),
+                (-6.2763, 53.3572),
+                (-6.2748, 53.3547),
+                (-6.2753, 53.3523),
+                (-6.2779, 53.3516),
+                (-6.2812, 53.3521),
+                (-6.2835, 53.3536),
+                (-6.2845, 53.3560),
+                (-6.2842, 53.3583),
             ),
             srid=4326,
         )
 
-        north_zone = Polygon(
+        academic_core = Polygon(
             (
-                (-6.2810, 53.3552),
-                (-6.2772, 53.3552),
-                (-6.2772, 53.3564),
-                (-6.2810, 53.3564),
-                (-6.2810, 53.3552),
+                (-6.2812, 53.3546),
+                (-6.2772, 53.3546),
+                (-6.2769, 53.3565),
+                (-6.2808, 53.3568),
+                (-6.2812, 53.3546),
             ),
             srid=4326,
         )
 
-        south_zone = Polygon(
+        sports_area = Polygon(
             (
-                (-6.2812, 53.3536),
-                (-6.2770, 53.3536),
-                (-6.2770, 53.3551),
-                (-6.2812, 53.3551),
-                (-6.2812, 53.3536),
+                (-6.2831, 53.3534),
+                (-6.2795, 53.3534),
+                (-6.2794, 53.3553),
+                (-6.2825, 53.3556),
+                (-6.2831, 53.3534),
             ),
             srid=4326,
         )
 
-        green_zone = Polygon(
+        south_campus = Polygon(
             (
-                (-6.2808, 53.3547),
-                (-6.2796, 53.3547),
-                (-6.2796, 53.3554),
-                (-6.2808, 53.3554),
-                (-6.2808, 53.3547),
+                (-6.2794, 53.3518),
+                (-6.2756, 53.3519),
+                (-6.2753, 53.3545),
+                (-6.2793, 53.3546),
+                (-6.2794, 53.3518),
             ),
             srid=4326,
         )
@@ -257,7 +318,8 @@ class Command(BaseCommand):
             name="Main Campus",
             defaults={
                 "description": (
-                    "Main demonstration campus boundary."
+                    "Approximate outer boundary of the TU Dublin "
+                    "Grangegorman campus."
                 ),
                 "zone_type": "campus",
                 "boundary": campus_boundary,
@@ -265,35 +327,38 @@ class Command(BaseCommand):
         )
 
         Zone.objects.update_or_create(
-            name="North Accessible Zone",
+            name="Academic Core",
             defaults={
                 "description": (
-                    "Northern accessible campus area."
+                    "Central academic area around Central Quad, "
+                    "Academic Hub and nearby facilities."
                 ),
-                "zone_type": "accessible",
-                "boundary": north_zone,
+                "zone_type": "study",
+                "boundary": academic_core,
             },
         )
 
         Zone.objects.update_or_create(
-            name="South Pedestrian Zone",
+            name="Sports Area",
             defaults={
                 "description": (
-                    "Pedestrian-focused southern campus area."
-                ),
-                "zone_type": "pedestrian",
-                "boundary": south_zone,
-            },
-        )
-
-        Zone.objects.update_or_create(
-            name="Central Green Space",
-            defaults={
-                "description": (
-                    "Central green and recreation space."
+                    "Approximate area containing the main campus "
+                    "sports pitches and related facilities."
                 ),
                 "zone_type": "green",
-                "boundary": green_zone,
+                "boundary": sports_area,
+            },
+        )
+
+        Zone.objects.update_or_create(
+            name="South Campus",
+            defaults={
+                "description": (
+                    "Approximate southern section around East Quad "
+                    "and Lower House."
+                ),
+                "zone_type": "pedestrian",
+                "boundary": south_campus,
             },
         )
 
@@ -309,71 +374,74 @@ class Command(BaseCommand):
 
         routes = [
             {
-                "name": "North-South Walking Route",
+                "name": "North-South Campus Walk",
                 "description": (
-                    "Main pedestrian connection "
-                    "through the campus."
+                    "Approximate pedestrian route connecting "
+                    "the northern campus to East Quad."
                 ),
                 "route_type": "walking",
-                "distance_m": 330,
+                "distance_m": 850,
                 "is_accessible": True,
                 "coordinates": [
-                    (-6.2796, 53.3562),
-                    (-6.2793, 53.3554),
-                    (-6.2790, 53.3546),
-                    (-6.2788, 53.3538),
+                    (-6.2828, 53.3577),
+                    (-6.2815, 53.3569),
+                    (-6.2802, 53.3560),
+                    (-6.2792, 53.3553),
+                    (-6.2784, 53.3545),
+                    (-6.2772, 53.3538),
+                    (-6.2765, 53.3535),
                 ],
             },
             {
-                "name": "Accessible East Route",
+                "name": "Central Accessible Route",
                 "description": (
-                    "Accessible route connecting "
-                    "eastern facilities."
+                    "Approximate accessible route through the "
+                    "central academic area."
                 ),
                 "route_type": "accessible",
-                "distance_m": 280,
+                "distance_m": 520,
                 "is_accessible": True,
                 "coordinates": [
-                    (-6.2780, 53.3560),
-                    (-6.2781, 53.3554),
-                    (-6.2780, 53.3548),
-                    (-6.2778, 53.3541),
+                    (-6.2810, 53.3559),
+                    (-6.2801, 53.3557),
+                    (-6.2791, 53.3556),
+                    (-6.2780, 53.3554),
+                    (-6.2772, 53.3548),
                 ],
             },
             {
-                "name": "West Walking Route",
+                "name": "Sports Area Walk",
                 "description": (
-                    "Walking route along the "
-                    "western side of campus."
+                    "Approximate pedestrian route along the "
+                    "campus sports area."
                 ),
                 "route_type": "walking",
-                "distance_m": 310,
-                "is_accessible": False,
+                "distance_m": 600,
+                "is_accessible": True,
                 "coordinates": [
-                    (-6.2807, 53.3561),
-                    (-6.2804, 53.3553),
-                    (-6.2804, 53.3546),
-                    (-6.2807, 53.3538),
+                    (-6.2828, 53.3549),
+                    (-6.2820, 53.3541),
+                    (-6.2808, 53.3536),
+                    (-6.2796, 53.3535),
                 ],
             },
             {
-                "name": "Central Cycle Route",
+                "name": "East Quad Cycle Connection",
                 "description": (
-                    "Cycle route crossing the "
-                    "central campus area."
+                    "Approximate cycling connection toward East Quad."
                 ),
                 "route_type": "cycling",
-                "distance_m": 420,
+                "distance_m": 470,
                 "is_accessible": True,
                 "coordinates": [
-                    (-6.2810, 53.3550),
-                    (-6.2798, 53.3550),
-                    (-6.2786, 53.3550),
-                    (-6.2772, 53.3550),
+                    (-6.2800, 53.3551),
+                    (-6.2787, 53.3548),
+                    (-6.2775, 53.3542),
+                    (-6.2764, 53.3537),
                 ],
             },
         ]
-
+        
         for item in routes:
             Route.objects.update_or_create(
                 name=item["name"],

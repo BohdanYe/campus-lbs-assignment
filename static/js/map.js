@@ -1,48 +1,84 @@
-const CAMPUS_CENTER = [53.3550, -6.2792];
+// ============================================================
+// Campus Services & Accessibility Finder
+// Main Leaflet map
+// ============================================================
+
+
+// ------------------------------------------------------------
+// 1. Map setup
+// ------------------------------------------------------------
+
+const CAMPUS_CENTER = [53.3552, -6.2798];
 
 const map = L.map("map").setView(
     CAMPUS_CENTER,
-    17
+    16
 );
 
 
+// OpenStreetMap base layer
 const osmLayer = L.tileLayer(
     "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
     {
         maxZoom: 19,
-        attribution:
-            "&copy; OpenStreetMap contributors"
+        attribution: "&copy; OpenStreetMap contributors"
     }
 );
 
 osmLayer.addTo(map);
 
 
-const placesLayer = L.layerGroup().addTo(map);
-const routesLayer = L.layerGroup().addTo(map);
-const zonesLayer = L.layerGroup().addTo(map);
+// ------------------------------------------------------------
+// 2. Map layers
+// ------------------------------------------------------------
 
-const searchResultsLayer =
-    L.layerGroup().addTo(map);
+// FeatureGroup is used because it supports getBounds().
+const placesLayer = L.featureGroup().addTo(map);
+const routesLayer = L.featureGroup().addTo(map);
+const zonesLayer = L.featureGroup().addTo(map);
 
+// Temporary highlighted search results
+const searchResultsLayer = L.featureGroup().addTo(map);
 
 let searchMarker = null;
 let radiusCircle = null;
+let campusBounds = null;
 
+
+// ------------------------------------------------------------
+// 3. Colours
+// ------------------------------------------------------------
 
 function categoryColour(category) {
 
     const colours = {
+        academic: "#0d6efd",
         library: "#6f42c1",
+        student_services: "#6610f2",
+        health: "#dc3545",
+        sports: "#198754",
         cafe: "#fd7e14",
-        study: "#0d6efd",
-        printer: "#6c757d",
-        bike: "#198754",
-        accessibility: "#dc3545",
+        study: "#20c997",
+        accessibility: "#d63384",
+        transport: "#6c757d",
+        heritage: "#795548",
+        community: "#0dcaf0",
         other: "#212529"
     };
 
     return colours[category] || "#212529";
+}
+
+
+function routeColour(type) {
+
+    const colours = {
+        walking: "#0d6efd",
+        accessible: "#198754",
+        cycling: "#fd7e14"
+    };
+
+    return colours[type] || "#212529";
 }
 
 
@@ -61,29 +97,28 @@ function zoneColour(type) {
 }
 
 
-function routeColour(type) {
-
-    const colours = {
-        walking: "#0d6efd",
-        accessible: "#198754",
-        cycling: "#fd7e14"
-    };
-
-    return colours[type] || "#212529";
-}
-
+// ------------------------------------------------------------
+// 4. API helper
+// ------------------------------------------------------------
 
 async function fetchJSON(url) {
 
     const response = await fetch(url);
 
-    const data = await response.json();
+    let data;
+
+    try {
+        data = await response.json();
+    } catch {
+        throw new Error("The server returned an invalid response.");
+    }
 
     if (!response.ok) {
+
         const message =
             data.error ||
             data.detail ||
-            "Request failed.";
+            "The request failed.";
 
         throw new Error(message);
     }
@@ -92,20 +127,76 @@ async function fetchJSON(url) {
 }
 
 
+// ------------------------------------------------------------
+// 5. Place popup
+// ------------------------------------------------------------
+
+function createPlacePopup(properties) {
+
+    const buildingCode = properties.building_code
+        ? `
+            <div>
+                <strong>Building code:</strong>
+                ${properties.building_code}
+            </div>
+        `
+        : "";
+
+    return `
+        <div style="min-width: 220px;">
+
+            <h6 class="mb-2">
+                ${properties.name}
+            </h6>
+
+            ${buildingCode}
+
+            <div>
+                <strong>Category:</strong>
+                ${properties.category}
+            </div>
+
+            <div>
+                <strong>Opening hours:</strong>
+                ${properties.opening_hours || "Not provided"}
+            </div>
+
+            <div>
+                <strong>Accessible:</strong>
+                ${properties.is_accessible ? "Yes" : "No"}
+            </div>
+
+            <hr class="my-2">
+
+            <p class="mb-0">
+                ${properties.description || "No description available."}
+            </p>
+
+        </div>
+    `;
+}
+
+
+// ------------------------------------------------------------
+// 6. Load places
+// ------------------------------------------------------------
+
 async function loadPlaces() {
 
+    const categoryElement =
+        document.getElementById("categoryFilter");
+
+    const accessibleElement =
+        document.getElementById("accessibleOnly");
+
     const category =
-        document.getElementById(
-            "categoryFilter"
-        ).value;
+        categoryElement ? categoryElement.value : "";
 
     const accessible =
-        document.getElementById(
-            "accessibleOnly"
-        ).checked;
+        accessibleElement ? accessibleElement.checked : false;
 
-    const params =
-        new URLSearchParams();
+
+    const params = new URLSearchParams();
 
     if (category) {
         params.append(
@@ -121,25 +212,23 @@ async function loadPlaces() {
         );
     }
 
+
     let url = "/api/places/";
 
     if (params.toString()) {
         url += `?${params.toString()}`;
     }
 
+
     const data = await fetchJSON(url);
 
     placesLayer.clearLayers();
 
-    let count = 0;
 
     data.features.forEach(feature => {
 
-        const properties =
-            feature.properties;
-
-        const coordinates =
-            feature.geometry.coordinates;
+        const properties = feature.properties;
+        const coordinates = feature.geometry.coordinates;
 
         const marker = L.circleMarker(
             [
@@ -150,214 +239,287 @@ async function loadPlaces() {
                 radius: 8,
                 color: "#ffffff",
                 weight: 2,
-                fillColor:
-                    categoryColour(
-                        properties.category
-                    ),
+                fillColor: categoryColour(
+                    properties.category
+                ),
                 fillOpacity: 0.95
             }
         );
 
-        marker.bindPopup(`
-            <div>
-                <h6>${properties.name}</h6>
-                <div>
-                    <strong>Category:</strong>
-                    ${properties.category}
-                </div>
-                <div>
-                    <strong>Opening hours:</strong>
-                    ${properties.opening_hours || "Not provided"}
-                </div>
-                <div>
-                    <strong>Accessible:</strong>
-                    ${properties.is_accessible ? "Yes" : "No"}
-                </div>
-                <p class="mt-2 mb-0">
-                    ${properties.description || ""}
-                </p>
-            </div>
-        `);
+
+        marker.bindPopup(
+            createPlacePopup(properties)
+        );
 
         marker.addTo(placesLayer);
-
-        count += 1;
     });
 
-    document.getElementById(
-        "placeCount"
-    ).textContent = count;
+
+    const placeCount =
+        document.getElementById("placeCount");
+
+    if (placeCount) {
+        placeCount.textContent =
+            data.features.length;
+    }
 }
 
+
+// ------------------------------------------------------------
+// 7. Load routes
+// ------------------------------------------------------------
 
 async function loadRoutes() {
 
     const data =
-        await fetchJSON(
-            "/api/routes/"
-        );
+        await fetchJSON("/api/routes/");
 
     routesLayer.clearLayers();
 
-    let count = 0;
 
     data.features.forEach(feature => {
 
-        const properties =
-            feature.properties;
+        const properties = feature.properties;
 
-        const layer =
-            L.geoJSON(
-                feature,
-                {
-                    style: {
-                        color:
-                            routeColour(
-                                properties.route_type
-                            ),
-                        weight: 5,
-                        opacity: 0.9
-                    }
+        const layer = L.geoJSON(
+            feature,
+            {
+                style: {
+                    color: routeColour(
+                        properties.route_type
+                    ),
+                    weight: 5,
+                    opacity: 0.9
                 }
-            );
+            }
+        );
+
 
         layer.bindPopup(`
-            <div>
-                <h6>${properties.name}</h6>
+            <div style="min-width: 200px;">
+
+                <h6>
+                    ${properties.name}
+                </h6>
+
                 <div>
-                    <strong>Type:</strong>
+                    <strong>Route type:</strong>
                     ${properties.route_type}
                 </div>
+
                 <div>
                     <strong>Distance:</strong>
                     ${properties.distance_m || "Unknown"} m
                 </div>
+
                 <div>
                     <strong>Accessible:</strong>
                     ${properties.is_accessible ? "Yes" : "No"}
                 </div>
+
+                <hr class="my-2">
+
+                <p class="mb-0">
+                    ${properties.description || ""}
+                </p>
+
             </div>
         `);
 
-        layer.addTo(routesLayer);
 
-        count += 1;
+        layer.addTo(routesLayer);
     });
 
-    document.getElementById(
-        "routeCount"
-    ).textContent = count;
+
+    const routeCount =
+        document.getElementById("routeCount");
+
+    if (routeCount) {
+        routeCount.textContent =
+            data.features.length;
+    }
 }
 
+
+// ------------------------------------------------------------
+// 8. Load zones
+// ------------------------------------------------------------
 
 async function loadZones() {
 
     const data =
-        await fetchJSON(
-            "/api/zones/"
-        );
+        await fetchJSON("/api/zones/");
 
     zonesLayer.clearLayers();
 
-    let count = 0;
 
     data.features.forEach(feature => {
 
-        const properties =
-            feature.properties;
+        const properties = feature.properties;
 
-        const layer =
-            L.geoJSON(
-                feature,
-                {
-                    style: {
-                        color:
-                            zoneColour(
-                                properties.zone_type
-                            ),
-                        weight: 2,
-                        fillOpacity: 0.15
-                    }
+        const layer = L.geoJSON(
+            feature,
+            {
+                style: {
+                    color: zoneColour(
+                        properties.zone_type
+                    ),
+                    weight:
+                        properties.zone_type === "campus"
+                            ? 4
+                            : 2,
+                    fillOpacity:
+                        properties.zone_type === "campus"
+                            ? 0.05
+                            : 0.14
                 }
-            );
+            }
+        );
+
 
         layer.bindPopup(`
-            <div>
-                <h6>${properties.name}</h6>
+            <div style="min-width: 200px;">
+
+                <h6>
+                    ${properties.name}
+                </h6>
+
                 <div>
                     <strong>Zone type:</strong>
                     ${properties.zone_type}
                 </div>
-                <p class="mt-2 mb-0">
+
+                <hr class="my-2">
+
+                <p class="mb-0">
                     ${properties.description || ""}
                 </p>
+
             </div>
         `);
 
-        layer.addTo(zonesLayer);
 
-        count += 1;
+        layer.addTo(zonesLayer);
     });
 
-    document.getElementById(
-        "zoneCount"
-    ).textContent = count;
-}
 
+    const zoneCount =
+        document.getElementById("zoneCount");
 
-function getSelectedCoordinates() {
-
-    const lat =
-        document.getElementById(
-            "searchLat"
-        ).value;
-
-    const lng =
-        document.getElementById(
-            "searchLng"
-        ).value;
-
-    if (!lat || !lng) {
-        throw new Error(
-            "Click on the map to choose a search location first."
-        );
+    if (zoneCount) {
+        zoneCount.textContent =
+            data.features.length;
     }
 
-    return {
-        lat: Number(lat),
-        lng: Number(lng)
-    };
+
+    // Automatically frame the whole campus.
+    if (zonesLayer.getLayers().length > 0) {
+
+        const bounds =
+            zonesLayer.getBounds();
+
+        if (bounds.isValid()) {
+
+            campusBounds = bounds;
+
+            map.fitBounds(
+                bounds,
+                {
+                    padding: [25, 25]
+                }
+            );
+        }
+    }
 }
 
+
+// ------------------------------------------------------------
+// 9. Populate zone selection
+// ------------------------------------------------------------
+
+async function populateZoneSelect() {
+
+    const select =
+        document.getElementById("zoneSelect");
+
+    if (!select) {
+        return;
+    }
+
+
+    const data =
+        await fetchJSON("/api/zones/");
+
+
+    select.innerHTML = `
+        <option value="">
+            Select a zone
+        </option>
+    `;
+
+
+    data.features.forEach(feature => {
+
+        const option =
+            document.createElement("option");
+
+        option.value = feature.id;
+
+        option.textContent =
+            feature.properties.name;
+
+        select.appendChild(option);
+    });
+}
+
+
+// ------------------------------------------------------------
+// 10. Search location
+// ------------------------------------------------------------
 
 function setSearchPoint(lat, lng) {
 
-    document.getElementById(
-        "searchLat"
-    ).value = lat.toFixed(6);
+    const latInput =
+        document.getElementById("searchLat");
 
-    document.getElementById(
-        "searchLng"
-    ).value = lng.toFixed(6);
+    const lngInput =
+        document.getElementById("searchLng");
+
+
+    if (latInput) {
+        latInput.value =
+            lat.toFixed(6);
+    }
+
+    if (lngInput) {
+        lngInput.value =
+            lng.toFixed(6);
+    }
+
 
     if (searchMarker) {
-        map.removeLayer(searchMarker);
+
+        map.removeLayer(
+            searchMarker
+        );
     }
+
 
     searchMarker = L.marker(
         [lat, lng]
     )
-    .addTo(map)
-    .bindPopup(
-        "Selected search location"
-    )
-    .openPopup();
+        .addTo(map)
+        .bindPopup(
+            "Selected search location"
+        )
+        .openPopup();
 }
 
 
 map.on(
     "click",
     event => {
+
         setSearchPoint(
             event.latlng.lat,
             event.latlng.lng
@@ -366,15 +528,66 @@ map.on(
 );
 
 
+// ------------------------------------------------------------
+// 11. Read selected coordinates
+// ------------------------------------------------------------
+
+function getSelectedCoordinates() {
+
+    const latElement =
+        document.getElementById("searchLat");
+
+    const lngElement =
+        document.getElementById("searchLng");
+
+
+    if (!latElement || !lngElement) {
+
+        throw new Error(
+            "Search coordinate fields are not available."
+        );
+    }
+
+
+    const lat = latElement.value;
+    const lng = lngElement.value;
+
+
+    if (!lat || !lng) {
+
+        throw new Error(
+            "Click on the map to choose a search location first."
+        );
+    }
+
+
+    return {
+        lat: Number(lat),
+        lng: Number(lng)
+    };
+}
+
+
+// ------------------------------------------------------------
+// 12. Clear search results
+// ------------------------------------------------------------
+
 function clearSearchResults() {
 
     searchResultsLayer.clearLayers();
 
-    document.getElementById(
-        "resultsList"
-    ).innerHTML = "";
+    const results =
+        document.getElementById("resultsList");
+
+    if (results) {
+        results.innerHTML = "";
+    }
 }
 
+
+// ------------------------------------------------------------
+// 13. Display place search results
+// ------------------------------------------------------------
 
 function showPlaceResults(
     features,
@@ -383,30 +596,40 @@ function showPlaceResults(
 
     clearSearchResults();
 
-    const results =
+
+    const resultMessage =
+        document.getElementById(
+            "resultsMessage"
+        );
+
+    const resultsList =
         document.getElementById(
             "resultsList"
         );
 
-    document.getElementById(
-        "resultsMessage"
-    ).textContent =
-        `${title}: ${features.length} result(s)`;
+
+    if (resultMessage) {
+
+        resultMessage.textContent =
+            `${title}: ${features.length} result(s)`;
+    }
+
 
     features.forEach(
         (feature, index) => {
 
-            const props =
+            const properties =
                 feature.properties;
 
-            const coords =
+            const coordinates =
                 feature.geometry.coordinates;
+
 
             const marker =
                 L.circleMarker(
                     [
-                        coords[1],
-                        coords[0]
+                        coordinates[1],
+                        coordinates[0]
                     ],
                     {
                         radius: 11,
@@ -415,52 +638,76 @@ function showPlaceResults(
                         fillColor: "#ffc107",
                         fillOpacity: 1
                     }
-                )
-                .addTo(searchResultsLayer);
-
-            marker.bindPopup(
-                `<strong>${props.name}</strong><br>
-                 Distance:
-                 ${props.distance_m ?? "Unknown"} m`
-            );
-
-            const item =
-                document.createElement(
-                    "div"
                 );
 
-            item.className =
-                "result-item";
 
-            item.innerHTML = `
-                <strong>
-                    ${index + 1}. ${props.name}
-                </strong>
-                <div class="result-distance">
-                    ${props.distance_m ?? "Unknown"} metres
-                </div>
-            `;
-
-            item.addEventListener(
-                "click",
-                () => {
-                    map.setView(
-                        [
-                            coords[1],
-                            coords[0]
-                        ],
-                        19
-                    );
-
-                    marker.openPopup();
-                }
+            marker.bindPopup(
+                createPlacePopup(properties)
             );
 
-            results.appendChild(item);
+            marker.addTo(
+                searchResultsLayer
+            );
+
+
+            if (resultsList) {
+
+                const item =
+                    document.createElement(
+                        "div"
+                    );
+
+                item.className =
+                    "result-item";
+
+
+                const distance =
+                    properties.distance_m !== null &&
+                    properties.distance_m !== undefined
+                        ? `${properties.distance_m} m`
+                        : "Distance unavailable";
+
+
+                item.innerHTML = `
+                    <strong>
+                        ${index + 1}. ${properties.name}
+                    </strong>
+
+                    <div class="result-distance">
+                        ${distance}
+                    </div>
+                `;
+
+
+                item.addEventListener(
+                    "click",
+                    () => {
+
+                        map.setView(
+                            [
+                                coordinates[1],
+                                coordinates[0]
+                            ],
+                            19
+                        );
+
+                        marker.openPopup();
+                    }
+                );
+
+
+                resultsList.appendChild(
+                    item
+                );
+            }
         }
     );
 }
 
+
+// ------------------------------------------------------------
+// 14. Nearest place search
+// ------------------------------------------------------------
 
 async function findNearest() {
 
@@ -469,10 +716,18 @@ async function findNearest() {
         const { lat, lng } =
             getSelectedCoordinates();
 
-        const limit =
+
+        const limitElement =
             document.getElementById(
                 "nearestLimit"
-            ).value;
+            );
+
+
+        const limit =
+            limitElement
+                ? limitElement.value
+                : 5;
+
 
         const url =
             `/api/places/nearest/` +
@@ -480,8 +735,10 @@ async function findNearest() {
             `&lng=${lng}` +
             `&limit=${limit}`;
 
+
         const data =
             await fetchJSON(url);
+
 
         showPlaceResults(
             data.features,
@@ -495,6 +752,10 @@ async function findNearest() {
 }
 
 
+// ------------------------------------------------------------
+// 15. Radius search
+// ------------------------------------------------------------
+
 async function findWithinRadius() {
 
     try {
@@ -502,12 +763,18 @@ async function findWithinRadius() {
         const { lat, lng } =
             getSelectedCoordinates();
 
-        const radius =
-            Number(
-                document.getElementById(
-                    "radiusInput"
-                ).value
+
+        const radiusElement =
+            document.getElementById(
+                "radiusInput"
             );
+
+
+        const radius =
+            radiusElement
+                ? Number(radiusElement.value)
+                : 150;
+
 
         const url =
             `/api/places/within-radius/` +
@@ -515,19 +782,24 @@ async function findWithinRadius() {
             `&lng=${lng}` +
             `&radius=${radius}`;
 
+
         const data =
             await fetchJSON(url);
+
 
         showPlaceResults(
             data.features,
             "Places within radius"
         );
 
+
         if (radiusCircle) {
+
             map.removeLayer(
                 radiusCircle
             );
         }
+
 
         radiusCircle =
             L.circle(
@@ -539,79 +811,13 @@ async function findWithinRadius() {
                     fillOpacity: 0.08
                 }
             )
-            .addTo(map);
+                .addTo(map);
+
 
         map.fitBounds(
-            radiusCircle.getBounds()
-        );
-
-    } catch (error) {
-
-        alert(error.message);
-    }
-}
-
-
-async function findContainingZone() {
-
-    try {
-
-        const { lat, lng } =
-            getSelectedCoordinates();
-
-        const url =
-            `/api/zones/contains-point/` +
-            `?lat=${lat}` +
-            `&lng=${lng}`;
-
-        const data =
-            await fetchJSON(url);
-
-        clearSearchResults();
-
-        const list =
-            document.getElementById(
-                "resultsList"
-            );
-
-        document.getElementById(
-            "resultsMessage"
-        ).textContent =
-            `Containing zones: ${data.features.length}`;
-
-        data.features.forEach(
-            feature => {
-
-                const item =
-                    document.createElement(
-                        "div"
-                    );
-
-                item.className =
-                    "result-item";
-
-                item.innerHTML = `
-                    <strong>
-                        ${feature.properties.name}
-                    </strong>
-                    <div>
-                        ${feature.properties.zone_type}
-                    </div>
-                `;
-
-                list.appendChild(item);
-
-                L.geoJSON(
-                    feature,
-                    {
-                        style: {
-                            color: "#ffc107",
-                            weight: 5,
-                            fillOpacity: 0.25
-                        }
-                    }
-                )
-                .addTo(searchResultsLayer);
+            radiusCircle.getBounds(),
+            {
+                padding: [20, 20]
             }
         );
 
@@ -622,11 +828,230 @@ async function findContainingZone() {
 }
 
 
+// ------------------------------------------------------------
+// 16. Find containing zones
+// ------------------------------------------------------------
+
+async function findContainingZone() {
+
+    try {
+
+        const { lat, lng } =
+            getSelectedCoordinates();
+
+
+        const url =
+            `/api/zones/contains-point/` +
+            `?lat=${lat}` +
+            `&lng=${lng}`;
+
+
+        const data =
+            await fetchJSON(url);
+
+
+        clearSearchResults();
+
+
+        const message =
+            document.getElementById(
+                "resultsMessage"
+            );
+
+        const results =
+            document.getElementById(
+                "resultsList"
+            );
+
+
+        if (message) {
+
+            message.textContent =
+                `Containing zones: ${data.features.length}`;
+        }
+
+
+        data.features.forEach(
+            feature => {
+
+                const layer =
+                    L.geoJSON(
+                        feature,
+                        {
+                            style: {
+                                color: "#ffc107",
+                                weight: 5,
+                                fillOpacity: 0.22
+                            }
+                        }
+                    );
+
+
+                layer.addTo(
+                    searchResultsLayer
+                );
+
+
+                if (results) {
+
+                    const item =
+                        document.createElement(
+                            "div"
+                        );
+
+                    item.className =
+                        "result-item";
+
+                    item.innerHTML = `
+                        <strong>
+                            ${feature.properties.name}
+                        </strong>
+
+                        <div>
+                            ${feature.properties.zone_type}
+                        </div>
+                    `;
+
+                    results.appendChild(
+                        item
+                    );
+                }
+            }
+        );
+
+    } catch (error) {
+
+        alert(error.message);
+    }
+}
+
+
+// ------------------------------------------------------------
+// 17. Find routes intersecting a zone
+// ------------------------------------------------------------
+
+async function findIntersectingRoutes() {
+
+    const zoneSelect =
+        document.getElementById(
+            "zoneSelect"
+        );
+
+
+    if (!zoneSelect) {
+        return;
+    }
+
+
+    const zoneId =
+        zoneSelect.value;
+
+
+    if (!zoneId) {
+
+        alert(
+            "Select a zone first."
+        );
+
+        return;
+    }
+
+
+    try {
+
+        const data =
+            await fetchJSON(
+                `/api/routes/intersecting-zone/?zone_id=${zoneId}`
+            );
+
+
+        clearSearchResults();
+
+
+        const message =
+            document.getElementById(
+                "resultsMessage"
+            );
+
+        const results =
+            document.getElementById(
+                "resultsList"
+            );
+
+
+        if (message) {
+
+            message.textContent =
+                `Intersecting routes: ${data.features.length}`;
+        }
+
+
+        data.features.forEach(
+            feature => {
+
+                const layer =
+                    L.geoJSON(
+                        feature,
+                        {
+                            style: {
+                                color: "#dc3545",
+                                weight: 8,
+                                opacity: 1
+                            }
+                        }
+                    );
+
+
+                layer.addTo(
+                    searchResultsLayer
+                );
+
+
+                if (results) {
+
+                    const item =
+                        document.createElement(
+                            "div"
+                        );
+
+                    item.className =
+                        "result-item";
+
+                    item.innerHTML = `
+                        <strong>
+                            ${feature.properties.name}
+                        </strong>
+
+                        <div>
+                            ${feature.properties.route_type}
+                        </div>
+                    `;
+
+                    results.appendChild(
+                        item
+                    );
+                }
+            }
+        );
+
+    } catch (error) {
+
+        alert(error.message);
+    }
+}
+
+
+// ------------------------------------------------------------
+// 18. Reset
+// ------------------------------------------------------------
+
 function resetSearch() {
 
     clearSearchResults();
 
+
     if (searchMarker) {
+
         map.removeLayer(
             searchMarker
         );
@@ -634,7 +1059,9 @@ function resetSearch() {
         searchMarker = null;
     }
 
+
     if (radiusCircle) {
+
         map.removeLayer(
             radiusCircle
         );
@@ -642,132 +1069,260 @@ function resetSearch() {
         radiusCircle = null;
     }
 
-    document.getElementById(
-        "searchLat"
-    ).value = "";
 
-    document.getElementById(
-        "searchLng"
-    ).value = "";
+    const latInput =
+        document.getElementById(
+            "searchLat"
+        );
 
-    document.getElementById(
-        "resultsMessage"
-    ).textContent =
-        "No spatial search performed yet.";
+    const lngInput =
+        document.getElementById(
+            "searchLng"
+        );
 
-    map.setView(
-        CAMPUS_CENTER,
-        17
+
+    if (latInput) {
+        latInput.value = "";
+    }
+
+    if (lngInput) {
+        lngInput.value = "";
+    }
+
+
+    const message =
+        document.getElementById(
+            "resultsMessage"
+        );
+
+
+    if (message) {
+
+        message.textContent =
+            "No spatial search performed yet.";
+    }
+
+
+    if (
+        campusBounds &&
+        campusBounds.isValid()
+    ) {
+
+        map.fitBounds(
+            campusBounds,
+            {
+                padding: [25, 25]
+            }
+        );
+
+    } else {
+
+        map.setView(
+            CAMPUS_CENTER,
+            16
+        );
+    }
+}
+
+
+// ------------------------------------------------------------
+// 19. Event listeners
+// ------------------------------------------------------------
+
+const applyFilterButton =
+    document.getElementById(
+        "applyPlaceFilter"
+    );
+
+if (applyFilterButton) {
+
+    applyFilterButton.addEventListener(
+        "click",
+        loadPlaces
     );
 }
 
 
-document.getElementById(
-    "applyPlaceFilter"
-).addEventListener(
-    "click",
-    loadPlaces
-);
+const findNearestButton =
+    document.getElementById(
+        "findNearest"
+    );
+
+if (findNearestButton) {
+
+    findNearestButton.addEventListener(
+        "click",
+        findNearest
+    );
+}
 
 
-document.getElementById(
-    "findNearest"
-).addEventListener(
-    "click",
-    findNearest
-);
+const radiusButton =
+    document.getElementById(
+        "findRadius"
+    );
+
+if (radiusButton) {
+
+    radiusButton.addEventListener(
+        "click",
+        findWithinRadius
+    );
+}
 
 
-document.getElementById(
-    "findRadius"
-).addEventListener(
-    "click",
-    findWithinRadius
-);
+const zoneButton =
+    document.getElementById(
+        "findZone"
+    );
+
+if (zoneButton) {
+
+    zoneButton.addEventListener(
+        "click",
+        findContainingZone
+    );
+}
 
 
-document.getElementById(
-    "findZone"
-).addEventListener(
-    "click",
-    findContainingZone
-);
+const intersectionButton =
+    document.getElementById(
+        "findIntersectingRoutes"
+    );
+
+if (intersectionButton) {
+
+    intersectionButton.addEventListener(
+        "click",
+        findIntersectingRoutes
+    );
+}
 
 
-document.getElementById(
-    "resetSearch"
-).addEventListener(
-    "click",
-    resetSearch
-);
+const resetButton =
+    document.getElementById(
+        "resetSearch"
+    );
+
+if (resetButton) {
+
+    resetButton.addEventListener(
+        "click",
+        resetSearch
+    );
+}
 
 
-document.getElementById(
-    "showPlaces"
-).addEventListener(
-    "change",
-    event => {
+// ------------------------------------------------------------
+// 20. Layer controls
+// ------------------------------------------------------------
 
-        if (event.target.checked) {
-            map.addLayer(
-                placesLayer
-            );
-        } else {
-            map.removeLayer(
-                placesLayer
-            );
+const placesCheckbox =
+    document.getElementById(
+        "showPlaces"
+    );
+
+if (placesCheckbox) {
+
+    placesCheckbox.addEventListener(
+        "change",
+        event => {
+
+            if (event.target.checked) {
+
+                map.addLayer(
+                    placesLayer
+                );
+
+            } else {
+
+                map.removeLayer(
+                    placesLayer
+                );
+            }
         }
-    }
-);
+    );
+}
 
 
-document.getElementById(
-    "showRoutes"
-).addEventListener(
-    "change",
-    event => {
+const routesCheckbox =
+    document.getElementById(
+        "showRoutes"
+    );
 
-        if (event.target.checked) {
-            map.addLayer(
-                routesLayer
-            );
-        } else {
-            map.removeLayer(
-                routesLayer
-            );
+if (routesCheckbox) {
+
+    routesCheckbox.addEventListener(
+        "change",
+        event => {
+
+            if (event.target.checked) {
+
+                map.addLayer(
+                    routesLayer
+                );
+
+            } else {
+
+                map.removeLayer(
+                    routesLayer
+                );
+            }
         }
-    }
-);
+    );
+}
 
 
-document.getElementById(
-    "showZones"
-).addEventListener(
-    "change",
-    event => {
+const zonesCheckbox =
+    document.getElementById(
+        "showZones"
+    );
 
-        if (event.target.checked) {
-            map.addLayer(
-                zonesLayer
-            );
-        } else {
-            map.removeLayer(
-                zonesLayer
-            );
+if (zonesCheckbox) {
+
+    zonesCheckbox.addEventListener(
+        "change",
+        event => {
+
+            if (event.target.checked) {
+
+                map.addLayer(
+                    zonesLayer
+                );
+
+            } else {
+
+                map.removeLayer(
+                    zonesLayer
+                );
+            }
         }
-    }
-);
+    );
+}
 
+
+// ------------------------------------------------------------
+// 21. Initialise application
+// ------------------------------------------------------------
 
 async function initialiseApplication() {
 
     try {
 
+        // Zones are loaded first so the map can frame the campus.
+        await loadZones();
+
         await Promise.all([
-            loadZones(),
             loadRoutes(),
             loadPlaces()
         ]);
+
+        await populateZoneSelect();
+
+
+        console.log(
+            "Campus LBS application loaded successfully."
+        );
 
     } catch (error) {
 
@@ -777,7 +1332,7 @@ async function initialiseApplication() {
         );
 
         alert(
-            "Could not load spatial data."
+            "Could not load campus spatial data."
         );
     }
 }

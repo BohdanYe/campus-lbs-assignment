@@ -128,24 +128,51 @@
                         <option value="">
                             All categories
                         </option>
+
+                        <option value="academic">
+                            Academic Building
+                        </option>
+
                         <option value="library">
                             Library
                         </option>
-                        <option value="cafe">
-                            Cafe
+
+                        <option value="student_services">
+                            Student Services
                         </option>
+
+                        <option value="health">
+                            Health Service
+                        </option>
+
+                        <option value="sports">
+                            Sports Facility
+                        </option>
+
+                        <option value="cafe">
+                            Cafe / Catering
+                        </option>
+
                         <option value="study">
                             Study Area
                         </option>
-                        <option value="printer">
-                            Printer
-                        </option>
-                        <option value="bike">
-                            Bike Parking
-                        </option>
+
                         <option value="accessibility">
-                            Accessibility
+                            Accessibility Service
                         </option>
+
+                        <option value="transport">
+                            Transport
+                        </option>
+
+                        <option value="heritage">
+                            Heritage / Landmark
+                        </option>
+
+                        <option value="community">
+                            Community Facility
+                        </option>
+
                         <option value="other">
                             Other
                         </option>
@@ -279,6 +306,31 @@
                         class="btn btn-warning w-100 mb-2"
                     >
                         Find Containing Zone
+                    </button>
+
+                    <hr>
+
+                    <label
+                        for="zoneSelect"
+                        class="form-label"
+                    >
+                        Route intersection zone
+                    </label>
+
+                    <select
+                        id="zoneSelect"
+                        class="form-select mb-2"
+                    >
+                        <option value="">
+                            Select a zone
+                        </option>
+                    </select>
+
+                    <button
+                        id="findIntersectingRoutes"
+                        class="btn btn-dark w-100 mb-2"
+                    >
+                        Find Routes Through Zone
                     </button>
 
 

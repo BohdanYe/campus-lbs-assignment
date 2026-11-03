@@ -4,19 +4,30 @@ from django.contrib.gis.db import models
 class Place(models.Model):
 
     CATEGORY_CHOICES = [
-        ('library', 'Library'),
-        ('cafe', 'Cafe'),
-        ('study', 'Study Area'),
-        ('printer', 'Printer'),
-        ('bike', 'Bike Parking'),
-        ('accessibility', 'Accessibility Service'),
-        ('other', 'Other'),
+        ("academic", "Academic Building"),
+        ("library", "Library"),
+        ("student_services", "Student Services"),
+        ("health", "Health Service"),
+        ("sports", "Sports Facility"),
+        ("cafe", "Cafe / Catering"),
+        ("study", "Study Area"),
+        ("accessibility", "Accessibility Service"),
+        ("transport", "Transport"),
+        ("heritage", "Heritage / Landmark"),
+        ("community", "Community Facility"),
+        ("other", "Other"),
     ]
 
     name = models.CharField(
         max_length=150
     )
 
+    building_code = models.CharField(
+        max_length=10,
+        blank=True,
+        default=""
+    )
+    
     description = models.TextField(
         blank=True
     )
